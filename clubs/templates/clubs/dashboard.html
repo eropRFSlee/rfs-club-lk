@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет - {{ club.sport_name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            color: #1a1a2e;
+        }
+
+        .header {
+            background: #ffffff;
+            color: #1a2a4a;
+            padding: 12px 40px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid #e0e5ec;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .header-right .service-link {
+            color: #1a2a4a;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            background: transparent;
+            transition: background 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+        .header-right .service-link:hover {
+            background: #eef3f9;
+        }
+        .header-right .service-link-change {
+            color: #1a2a4a;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            background: transparent;
+            transition: background 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+        .header-right .service-link-change:hover {
+            background: #eef3f9;
+        }
+        .logout-btn {
+            background: #1a2a4a;
+            color: #ffffff;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background: #0d1b2a;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-toggle {
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            color: #1a2a4a;
+        }
+        .dropdown-toggle:hover {
+            background: #eef3f9;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border: 1px solid #e0e5ec;
+            z-index: 1000;
+            overflow: hidden;
+            padding: 6px 8px;
+            white-space: nowrap;
+        }
+        .dropdown-menu.show {
+            display: flex;
+            flex-direction: row;
+            gap: 4px;
+        }
+        .dropdown-menu a {
+            display: block;
+            padding: 8px 16px;
+            color: #1a2a4a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.15s;
+            cursor: pointer;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .dropdown-menu a:hover {
+            background: #f0f7ff;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1280px;
+            margin: 30px auto;
+            padding: 0 20px;
+            gap: 28px;
+            min-height: 70vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+        }
+        .sidebar-item {
+            display: block;
+            padding: 12px 18px;
+            margin-bottom: 4px;
+            background: #ffffff;
+            border-radius: 8px;
+            color: #1a2a4a;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.15s;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+        .sidebar-item:hover {
+            background: #eef3f9;
+            color: #1a2a4a;
+        }
+        .sidebar-item.active {
+            background: #eef3f9;
+            color: #1a2a4a;
+            font-weight: 600;
+        }
+        .sidebar-item.external::after {
+            content: " ↗";
+            color: #6a7b8c;
+        }
+
+        .content {
+            flex: 1;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px 36px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .club-header h2 {
+            font-size: 28px;
+            color: #1a2a4a;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            margin-bottom: 24px;
+        }
+
+        .accordion {
+            border: 1px solid #e0e5ec;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .accordion-header {
+            background: #f8faff;
+            padding: 14px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #1a2a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+            user-select: none;
+        }
+        .accordion-header:hover {
+            background: #eef3f9;
+        }
+        .accordion-header .arrow {
+            transition: transform 0.3s;
+            font-size: 12px;
+            color: #6a7b8c;
+        }
+        .accordion-header.active .arrow {
+            transform: rotate(180deg);
+        }
+        .accordion-body {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background: #ffffff;
+        }
+        .accordion-body.open {
+            padding: 16px 20px 20px;
+            max-height: 500px;
+        }
+        .accordion-body .info-item {
+            padding: 6px 0;
+            font-size: 15px;
+            color: #1a2a4a;
+            line-height: 1.8;
+            border-bottom: 1px solid #f0f4f9;
+        }
+        .accordion-body .info-item:last-child {
+            border-bottom: none;
+        }
+        .accordion-body .info-item strong {
+            font-weight: 600;
+            color: #1a2a4a;
+            min-width: 140px;
+            display: inline-block;
+        }
+        .accordion-body .info-item .value {
+            color: #1a2a4a;
+        }
+        .accordion-body .info-item .empty {
+            color: #6a7b8c;
+            font-style: italic;
+        }
+
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+        }
+        .doc-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: #f8faff;
+            border-bottom: 2px solid #e0e5ec;
+            font-weight: 600;
+            color: #1a2a4a;
+            font-size: 13px;
+        }
+        .doc-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f4f9;
+            vertical-align: middle;
+            font-size: 13px;
+        }
+        .doc-table .doc-name-cell {
+            font-weight: 500;
+            color: #1a2a4a;
+        }
+        .doc-table .doc-file-cell {
+            cursor: pointer;
+            color: #1a2b4a;
+            text-decoration: underline;
+        }
+        .doc-table .doc-file-cell:hover {
+            color: #1f50e8;
+        }
+        .doc-table .doc-status-cell {
+            text-align: center;
+        }
+        .doc-table .doc-actions-cell {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .doc-table .status-icon {
+            font-size: 18px;
+        }
+        .doc-table .status-icon.verified {
+            color: #10b981;
+        }
+        .doc-table .status-icon.not-verified {
+            color: #ef4444;
+        }
+
+        .doc-action {
+            background: none;
+            border: none;
+            color: #1a2b4a;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .doc-action:hover {
+            background: #eef3f9;
+        }
+        .doc-action.primary {
+            color: #1a2b4a;
+            font-weight: 600;
+        }
+        .doc-action.danger {
+            color: #d12b2b;
+        }
+        .doc-action.danger:hover {
+            background: #fde8e8;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .deals-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a2a4a;
+            margin-top: 16px;
+            margin-bottom: 12px;
+        }
+        .deal-item {
+            background: #f8faff;
+            border: 1px solid #e6edf4;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 0;
+        }
+        .deal-item:hover {
+            background: #eef3f9;
+        }
+        .deal-number {
+            color: #1a2b4a;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .deal-name {
+            color: #4a627a;
+            font-size: 14px;
+            margin-left: 12px;
+        }
+        .deal-date {
+            color: #6a7b8c;
+            font-size: 13px;
+            margin-right: 16px;
+        }
+        .deal-stage-badge {
+            background: #e8f0fe;
+            color: #1a2b4a;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .deal-arrow {
+            margin-left: 8px;
+            font-size: 12px;
+            color: #6a7b8c;
+            transition: transform 0.2s;
+        }
+        .deal-detail-container {
+            display: none;
+            padding: 12px 16px 16px;
+            background: #ffffff;
+            border-top: 1px solid #e6edf4;
+        }
+        .deal-wrapper {
+            margin-bottom: 8px;
+            border: 1px solid #e6edf4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .tracker-container {
+            margin-top: 8px;
+            background: #f8faff;
+            border-radius: 8px;
+            padding: 16px 16px 12px;
+            border: 1px solid #e6edf4;
+        }
+        .tracker-title {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a2a4a;
+        }
+        .tracker-steps {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 4px 0;
+            position: relative;
+        }
+        .tracker-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 44px;
+            position: relative;
+            z-index: 2;
+        }
+        .tracker-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            border: 3px solid #dde6ef;
+            background: #ffffff;
+            color: #8ca0b8;
+            position: relative;
+            cursor: pointer;
+        }
+        .tracker-circle.completed {
+            border-color: #1a2b4a;
+            background: #1a2b4a;
+            color: #ffffff;
+        }
+        .tracker-circle.active {
+            border-color: #d12b2b;
+            background: #d12b2b;
+            color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(209,43,43,0.15);
+        }
+        .tracker-circle .tooltip-text {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a2b4a;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 400;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .tracker-circle .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1a2b4a;
+        }
+        .tracker-circle:hover .tooltip-text {
+            opacity: 1;
+        }
+        .tracker-label {
+            margin-top: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            color: #8ca0b8;
+            max-width: 64px;
+            line-height: 1.2;
+        }
+        .tracker-label.completed {
+            color: #1a2b4a;
+        }
+        .tracker-label.active {
+            color: #d12b2b;
+        }
+        .tracker-line {
+            flex: 1;
+            height: 3px;
+            background: #dde6ef;
+            margin: 16px -2px 0;
+            min-width: 8px;
+            border-radius: 2px;
+        }
+        .tracker-line.completed {
+            background: #1a2b4a;
+        }
+        .tracker-line.active {
+            background: #d12b2b;
+        }
+
+        .deal-info-compact {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #f8faff;
+            border-radius: 8px;
+            border: 1px solid #e6edf4;
+        }
+        .deal-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 20px;
+            font-size: 13px;
+            color: #1a2a4a;
+            line-height: 1.7;
+        }
+        .deal-info-grid strong {
+            font-weight: 600;
+        }
+
+        .status-message {
+            color: #6a7b8c;
+            margin-top: 10px;
+        }
+        .error-message {
+            color: #d12b2b;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; padding: 0 16px; margin: 16px auto; }
+            .sidebar { width: 100%; }
+            .header { padding: 12px 20px; justify-content: flex-start; }
+            .header-right .service-link { font-size: 12px; padding: 4px 10px; }
+            .content { padding: 20px; }
+            .deal-info-grid { grid-template-columns: 1fr; }
+            .doc-table th, .doc-table td { padding: 6px 8px; font-size: 12px; }
+            .doc-actions-cell { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; }
+            .accordion-body .info-item strong { min-width: 100px; }
+            .accordion-body { padding: 0 12px; }
+            .accordion-body.open { padding: 12px 12px 16px; }
+            .tracker-step { min-width: 32px; }
+            .tracker-circle { width: 30px; height: 30px; font-size: 11px; }
+            .tracker-label { font-size: 8px; max-width: 44px; }
+            .tracker-line { margin: 12px -2px 0; }
+            .dropdown-menu {
+                left: 50%;
+                transform: translateX(-50%);
+                min-width: unset;
+                width: auto;
+            }
+            .dropdown-menu.show {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .dropdown-menu a {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-right">
+        <div class="dropdown">
+            <button class="service-link dropdown-toggle" onclick="toggleDropdown()">Услуги ▾</button>
+            <div class="dropdown-menu" id="servicesDropdown">
+                <a onclick="showDeals(); closeDropdown();">Регистрация несовершеннолетних</a>
+                <a onclick="alert('В разработке'); closeDropdown();">Подать заявление на ЕЕВ</a>
+                <a onclick="alert('В разработке'); closeDropdown();">Подать на права</a>
+                <a onclick="alert('В разработке'); closeDropdown();">Финансовый отчет</a>
+            </div>
+        </div>
+        <button class="service-link" onclick="showDocuments()">Документы</button>
+        <a href="{% url 'password_change' %}" class="service-link-change">Сменить пароль</a>
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Выйти</button>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <button class="sidebar-item active" onclick="showMain()">Главная</button>
+        <a href="https://school-eev.bitrix24site.ru/crm_form_lndpj/?mail_rff={{ club.email }}&rff={{ club.rff }}&team_id={{ club.rfs_id }}&team_name={{ club.sport_name }}&team_email={{ club.email }}&team_ogrn={{ club.ogrn }}" class="sidebar-item external" target="_blank">Подать регистрацию несовершеннолетних</a>
+        <button class="sidebar-item" onclick="alert('В разработке')">Подать заявление на ЕЕВ</button>
+        <button class="sidebar-item" onclick="alert('В разработке')">Подать на права</button>
+    </div>
+    
+    <div class="content" id="content">
+        
+        {% if club %}
+        <div id="main-view">
+            <div class="club-header">
+                <h2 id="club-sport-name">{{ club.sport_name }}</h2>
+            </div>
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Общая информация</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div class="info-item"><strong>РФС ID</strong> <span class="value" id="club-rfs-id">{{ club.rfs_id|default:"Не указан" }}</span></div>
+                    <div class="info-item"><strong>FIFA ID</strong> <span class="value" id="club-fifa-id">{{ club.fifa_id|default:"Не указан" }}</span></div>
+                </div>
+            </div>
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Юридическая информация</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div class="info-item"><strong>ОГРН</strong> <span class="value" id="club-ogrn">{{ club.ogrn|default:"Не указан" }}</span></div>
+                    <div class="info-item"><strong>Аффилированные организации</strong> <span class="value" id="club-aff-name">{{ club.aff_name|default:"Не указаны" }}</span></div>
+                </div>
+            </div>
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Контактная информация</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div class="info-item"><strong>Общий e-mail</strong> <span class="value" id="club-email">{{ club.email|default:"Не указан" }}</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="deals-view" class="hidden">
+            <div class="club-header"><h2>Заявки на регистрацию</h2></div>
+            <div id="deals-list"></div>
+        </div>
+        
+        <div id="documents-view" class="hidden">
+            <div class="club-header"><h2>Документы</h2></div>
+            
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Права</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <table class="doc-table">
+                        <thead><tr><th>Название документа</th><th>Файл</th><th style="text-align:center;">Статус</th><th></th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td class="doc-name-cell">Список сотрудников с правами в РФС.ЦП</td>
+                                <td class="doc-file-cell" id="rights-file-cell" style="cursor:default; text-decoration:none; color:#6a7b8c;"></td>
+                                <td class="doc-status-cell" id="rights-status-cell"></td>
+                                <td class="doc-actions-cell">
+                                    <button class="doc-action primary" id="rights-upload-btn" onclick="triggerFileUpload('rights')">Загрузить</button>
+                                    <button class="doc-action danger" id="rights-delete-btn" style="display:none;" onclick="deleteDocument('rights')">Удалить</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Медицина</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <table class="doc-table">
+                        <thead><tr><th>Название документа</th><th>Файл</th><th style="text-align:center;">Статус</th><th></th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td class="doc-name-cell">УМО</td>
+                                <td class="doc-file-cell" id="umo-file-cell" style="cursor:default; text-decoration:none; color:#6a7b8c;"></td>
+                                <td class="doc-status-cell" id="umo-status-cell"></td>
+                                <td class="doc-actions-cell">
+                                    <button class="doc-action primary" id="umo-upload-btn" onclick="triggerFileUpload('umo')">Загрузить</button>
+                                    <button class="doc-action danger" id="umo-delete-btn" style="display:none;" onclick="deleteDocument('umo')">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="doc-name-cell">Страховка</td>
+                                <td class="doc-file-cell" id="insurance-file-cell" style="cursor:default; text-decoration:none; color:#6a7b8c;"></td>
+                                <td class="doc-status-cell" id="insurance-status-cell"></td>
+                                <td class="doc-actions-cell">
+                                    <button class="doc-action primary" id="insurance-upload-btn" onclick="triggerFileUpload('insurance')">Загрузить</button>
+                                    <button class="doc-action danger" id="insurance-delete-btn" style="display:none;" onclick="deleteDocument('insurance')">Удалить</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- ===== ФИНАНСЫ (только если права = 1) ===== -->
+            {% if user_rights == 1 %}
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Финансы</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Название документа</th>
+                                <th>Файл</th>
+                                <th style="text-align:center;">Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="doc-name-cell">Финансовый отчет</td>
+                                <td class="doc-file-cell" id="finance-file-cell" style="cursor:default; text-decoration:none; color:#6a7b8c;"></td>
+                                <td class="doc-status-cell" id="finance-status-cell"></td>
+                                <td class="doc-actions-cell">
+                                    <button class="doc-action primary" id="finance-upload-btn" onclick="triggerFileUpload('finance')">Загрузить</button>
+                                    <button class="doc-action danger" id="finance-delete-btn" style="display:none;" onclick="deleteDocument('finance')">Удалить</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <input type="file" id="file-input" accept=".pdf,.doc,.docx" style="display:none;">
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 20px;">
+            <h2>Клуб не найден</h2>
+            <p>Ваш аккаунт не привязан ни к одному клубу.</p>
+            <a href="{% url 'logout' %}" style="display:inline-block; margin-top:20px; padding:12px 32px; background:#1a2b4a; color:#fff; border-radius:8px; text-decoration:none;">Выйти</a>
+        </div>
+        {% endif %}
+        
+    </div>
+</div>
+
+<script>
+    function toggleDropdown() {
+        document.getElementById('servicesDropdown').classList.toggle('show');
+    }
+    function closeDropdown() {
+        document.getElementById('servicesDropdown').classList.remove('show');
+    }
+    document.addEventListener('click', function(e) {
+        const dropdown = document.querySelector('.dropdown');
+        if (dropdown && !dropdown.contains(e.target)) closeDropdown();
+    });
+
+    function toggleAccordion(header) {
+        const body = header.nextElementSibling;
+        const isOpen = body.classList.contains('open');
+        if (isOpen) { body.classList.remove('open'); header.classList.remove('active'); }
+        else { body.classList.add('open'); header.classList.add('active'); }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // =====================================================
+    // === ДАННЫЕ ДОКУМЕНТОВ
+    // =====================================================
+    let docData = {
+        rights: { id: null, name: '' },
+        umo: { id: null, name: '' },
+        insurance: { id: null, name: '' },
+        finance: { id: null, name: '' }
+    };
+    let currentUploadType = null;
+
+    function getEl(type) {
+        return {
+            fileCell: document.getElementById(type + '-file-cell'),
+            statusCell: document.getElementById(type + '-status-cell'),
+            uploadBtn: document.getElementById(type + '-upload-btn'),
+            deleteBtn: document.getElementById(type + '-delete-btn')
+        };
+    }
+
+    function truncateName(name, maxLen = 25) {
+        if (name.length <= maxLen) return name;
+        const ext = name.split('.').pop();
+        const base = name.slice(0, name.lastIndexOf('.'));
+        return base.slice(0, maxLen - 3 - ext.length) + '...' + ext;
+    }
+
+    // =====================================================
+    // === ЗАГРУЗКА ДАННЫХ КЛУБА
+    // =====================================================
+    function loadClubData() {
+        fetch('/api/club-data/')
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) return;
+                if (data.club) {
+                    const c = data.club;
+                    document.getElementById('club-sport-name').textContent = c.sport_name || 'Не указан';
+                    document.getElementById('club-rfs-id').textContent = c.rfs_id || 'Не указан';
+                    document.getElementById('club-fifa-id').textContent = c.fifa_id || 'Не указан';
+                    document.getElementById('club-ogrn').textContent = c.ogrn || 'Не указан';
+                    document.getElementById('club-email').textContent = c.email || 'Не указан';
+                    document.getElementById('club-aff-name').textContent = c.aff_name || 'Не указаны';
+                    
+                    window.umoVerified = c.umo_verified || false;
+                    window.insuranceVerified = c.insurance_verified || false;
+                    
+                    updateStatus('umo', window.umoVerified);
+                    updateStatus('insurance', window.insuranceVerified);
+                    updateStatus('finance', false);
+                }
+            })
+            .catch(e => console.error(e));
+    }
+
+    // =====================================================
+    // === ОБНОВЛЕНИЕ СТАТУСА
+    // =====================================================
+    function updateStatus(type, verified) {
+        const el = getEl(type);
+        const statusCell = el.statusCell;
+        if (!statusCell) return;
+        
+        const hasName = el.fileCell.textContent && el.fileCell.textContent.trim() !== '';
+        
+        if (!hasName) {
+            statusCell.innerHTML = '';
+            return;
+        }
+        
+        if (verified) {
+            statusCell.innerHTML = '<span class="status-icon verified">✔</span>';
+        } else {
+            statusCell.innerHTML = '<span class="status-icon not-verified">✕</span>';
+        }
+    }
+
+    // =====================================================
+    // === ЗАГРУЗКА СТАТУСА ДОКУМЕНТА
+    // =====================================================
+    function loadDocumentStatus(type) {
+        const el = getEl(type);
+        if (!el) return;
+
+        fetch('/api/club-document/?doc_type=' + type)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error || !data.document || !data.document.id) {
+                    el.fileCell.textContent = '';
+                    el.fileCell.style.color = '#6a7b8c';
+                    el.fileCell.style.cursor = 'default';
+                    el.fileCell.style.textDecoration = 'none';
+                    el.fileCell.onclick = null;
+                    el.deleteBtn.style.display = 'none';
+                    el.uploadBtn.textContent = 'Загрузить';
+                    docData[type].id = null;
+                    docData[type].name = '';
+                    if (el.statusCell) el.statusCell.innerHTML = '';
+                    return;
+                }
+                docData[type].id = data.document.id;
+                docData[type].name = data.document.name || type;
+                const shortName = truncateName(docData[type].name);
+                el.fileCell.textContent = shortName;
+                el.fileCell.style.color = '#1a2b4a';
+                el.fileCell.style.cursor = 'pointer';
+                el.fileCell.style.textDecoration = 'underline';
+                el.fileCell.onclick = function(e) {
+                    e.stopPropagation();
+                    window.location.href = '/download-document/' + type + '/';
+                };
+                el.deleteBtn.style.display = 'inline';
+                el.uploadBtn.textContent = 'Заменить';
+                
+                if (type === 'umo') {
+                    updateStatus('umo', window.umoVerified || false);
+                } else if (type === 'insurance') {
+                    updateStatus('insurance', window.insuranceVerified || false);
+                }
+            })
+            .catch(() => {
+                el.fileCell.textContent = '';
+                el.fileCell.style.color = '#6a7b8c';
+                el.fileCell.style.cursor = 'default';
+                el.fileCell.style.textDecoration = 'none';
+                el.fileCell.onclick = null;
+                el.deleteBtn.style.display = 'none';
+                el.uploadBtn.textContent = 'Загрузить';
+                if (el.statusCell) el.statusCell.innerHTML = '';
+            });
+    }
+
+    function loadAllDocuments() {
+        loadClubData();
+        setTimeout(function() {
+            loadDocumentStatus('rights');
+            loadDocumentStatus('umo');
+            loadDocumentStatus('insurance');
+            loadDocumentStatus('finance');
+        }, 300);
+    }
+
+    // =====================================================
+    // === ЗАГРУЗКА ФАЙЛА
+    // =====================================================
+    function triggerFileUpload(type) {
+        currentUploadType = type;
+        document.getElementById('file-input').click();
+    }
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const type = currentUploadType;
+        if (!type) return;
+
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!['pdf', 'doc', 'docx'].includes(ext)) {
+            e.target.value = '';
+            return;
+        }
+        if (file.size > 50 * 1024 * 1024) {
+            e.target.value = '';
+            return;
+        }
+        if (file.name.length > 100) {
+            e.target.value = '';
+            return;
+        }
+        if (/[\\/:*?"<>|]/.test(file.name)) {
+            e.target.value = '';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('document', file);
+        formData.append('doc_type', type);
+
+        fetch('/api/upload-club-document/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                return;
+            }
+            loadAllDocuments();
+            e.target.value = '';
+        })
+        .catch(err => {
+            // НИЧЕГО НЕ ПОКАЗЫВАЕМ
+        });
+    });
+
+    // =====================================================
+    // === УДАЛЕНИЕ ФАЙЛА
+    // =====================================================
+    function deleteDocument(type) {
+        if (!docData[type].id) return;
+        const el = getEl(type);
+        if (!el) return;
+
+        fetch('/api/delete-club-document/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ doc_type: type })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                return;
+            }
+            loadAllDocuments();
+        })
+        .catch(err => {
+            // НИЧЕГО НЕ ПОКАЗЫВАЕМ
+        });
+    }
+
+    // =====================================================
+    // === ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+    // =====================================================
+    function showMain() {
+        document.getElementById('main-view').classList.remove('hidden');
+        document.getElementById('deals-view').classList.add('hidden');
+        document.getElementById('documents-view').classList.add('hidden');
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item')[0]?.classList.add('active');
+        loadClubData();
+    }
+
+    function showDeals() {
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('deals-view').classList.remove('hidden');
+        document.getElementById('documents-view').classList.add('hidden');
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        if (!window.dealsLoaded) loadDeals();
+    }
+
+    function showDocuments() {
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('deals-view').classList.add('hidden');
+        document.getElementById('documents-view').classList.remove('hidden');
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        loadAllDocuments();
+    }
+
+    // =====================================================
+    // === СДЕЛКИ
+    // =====================================================
+    const STAGE_NAMES = {
+        "C29:NEW": "Новая заявка",
+        "C29:EXECUTING": "Доработка заявителя",
+        "C29:FINAL_INVOICE": "Доработано заявителем",
+        "C29:UC_9MDUQP": "Запрос в НА",
+        "C29:UC_OHJ2SS": "Ответ от НА",
+        "C29:UC_FRU9NP": "Нет ответа от НА",
+        "C29:UC_MUWA8G": "Регистрация"
+    };
+    const STAGE_ORDER = ["C29:NEW","C29:EXECUTING","C29:FINAL_INVOICE","C29:UC_9MDUQP","C29:UC_OHJ2SS","C29:UC_FRU9NP","C29:UC_MUWA8G"];
+    const STAGE_DESC = {
+        "C29:NEW": "Заявка создана и ожидает первичной проверки.",
+        "C29:EXECUTING": "Заявитель вносит корректировки в документы.",
+        "C29:FINAL_INVOICE": "Документы доработаны и отправлены на проверку.",
+        "C29:UC_9MDUQP": "Запрос направлен в Национальную ассоциацию.",
+        "C29:UC_OHJ2SS": "Получен официальный ответ от НА.",
+        "C29:UC_FRU9NP": "Ответа от НА не поступило, требуется ручное вмешательство.",
+        "C29:UC_MUWA8G": "Заявка успешно зарегистрирована."
+    };
+    function getStageName(c) { return STAGE_NAMES[c] || c || 'Новая'; }
+    function getStageDesc(c) { return STAGE_DESC[c] || 'Этап обработки заявки.'; }
+
+    function loadDeals() {
+        const list = document.getElementById('deals-list');
+        list.innerHTML = '<p class="status-message">Загрузка заявок...</p>';
+        fetch('/api/deals/')
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { list.innerHTML = '<p class="error-message">' + data.error + '</p>'; return; }
+                if (!data.deals || data.deals.length === 0) {
+                    list.innerHTML = '<p class="status-message">Нет заявок для вашего клуба</p>';
+                    return;
+                }
+                let html = '<div class="deals-title">Список заявок</div>';
+                data.deals.forEach(deal => {
+                    const date = deal.DATE_CREATE ? new Date(deal.DATE_CREATE).toLocaleDateString('ru-RU') : '—';
+                    const fullName = [deal.UF_CRM_DEAL_1773845091277, deal.UF_CRM_DEAL_1773845130405].filter(Boolean).join(' ') || '—';
+                    const stageName = getStageName(deal.STAGE_ID);
+                    const id = deal.ID;
+                    html += `
+                        <div class="deal-wrapper">
+                            <div class="deal-item" onclick="toggleDealDetail(${id})">
+                                <div>
+                                    <span class="deal-number">№${id}</span>
+                                    <span class="deal-name">${fullName}</span>
+                                </div>
+                                <div>
+                                    <span class="deal-date">${date}</span>
+                                    <span class="deal-stage-badge">${stageName}</span>
+                                    <span class="deal-arrow" id="arrow-${id}">▼</span>
+                                </div>
+                            </div>
+                            <div class="deal-detail-container" id="detail-${id}">
+                                <p class="status-message" style="margin-top:0;">Загрузка...</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+                window.dealsLoaded = true;
+            })
+            .catch(() => { list.innerHTML = '<p class="error-message">Ошибка загрузки</p>'; });
+    }
+
+    function toggleDealDetail(id) {
+        const container = document.getElementById('detail-' + id);
+        const arrow = document.getElementById('arrow-' + id);
+        if (container.style.display === 'none' || container.style.display === '') {
+            container.style.display = 'block';
+            arrow.textContent = '▲';
+            if (container.dataset.loaded !== 'true') loadDealDetail(id, container);
+        } else {
+            container.style.display = 'none';
+            arrow.textContent = '▼';
+        }
+    }
+
+    function loadDealDetail(id, container) {
+        container.innerHTML = '<p class="status-message">Загрузка данных...</p>';
+        fetch('https://drlk.rfs.ru/rest/205/mkoe2cdimf6len15/crm.deal.get', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: id,
+                select: ["ID","TITLE","STAGE_ID","DATE_CREATE",
+                    "UF_CRM_DEAL_1773845091277","UF_CRM_DEAL_1773845130405",
+                    "UF_CRM_DEAL_1773909188274","UF_CRM_DEAL_1773909250766",
+                    "UF_CRM_DEAL_1773907718196","UF_CRM_DEAL_1773914756198",
+                    "UF_CRM_DEAL_1773914958204","UF_CRM_DEAL_1774945121159"]
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            const deal = data.result;
+            if (!deal || !deal.ID) {
+                container.innerHTML = '<p class="error-message">Сделка не найдена</p>';
+                return;
+            }
+            const formatDate = (d) => { if (!d) return '—'; const dt = new Date(d); return isNaN(dt) ? d.slice(0,10) : dt.toLocaleDateString('ru-RU'); };
+            const stageCode = deal.STAGE_ID || '';
+            const currentIndex = STAGE_ORDER.indexOf(stageCode);
+            
+            let trackerHtml = '<div class="tracker-container"><div class="tracker-title">Этапы рассмотрения</div><div class="tracker-steps">';
+            STAGE_ORDER.forEach((code, i) => {
+                let circleClass = '', labelClass = '';
+                if (i < currentIndex) { circleClass = 'completed'; labelClass = 'completed'; }
+                else if (i === currentIndex) { circleClass = 'active'; labelClass = 'active'; }
+                const name = STAGE_NAMES[code] || code;
+                trackerHtml += `
+                    <div class="tracker-step">
+                        <div class="tracker-circle ${circleClass}">${i+1}<span class="tooltip-text">${getStageDesc(code)}</span></div>
+                        <div class="tracker-label ${labelClass}">${name}</div>
+                    </div>
+                `;
+                if (i < STAGE_ORDER.length - 1) {
+                    let lineClass = '';
+                    if (i < currentIndex) lineClass = 'completed';
+                    else if (i === currentIndex) lineClass = 'active';
+                    trackerHtml += `<div class="tracker-line ${lineClass}"></div>`;
+                }
+            });
+            trackerHtml += '</div></div>';
+
+            const infoHtml = `
+                <div class="deal-info-compact">
+                    <div class="deal-info-grid">
+                        <div><strong>Дата подачи</strong> — ${formatDate(deal.DATE_CREATE)}</div>
+                        <div><strong>Фамилия</strong> — ${deal.UF_CRM_DEAL_1773845091277 || '—'}</div>
+                        <div><strong>Имя</strong> — ${deal.UF_CRM_DEAL_1773845130405 || '—'}</div>
+                        <div><strong>Клуб</strong> — ${deal.UF_CRM_DEAL_1773909188274 || '—'}</div>
+                        <div><strong>РФС ID клуба</strong> — ${deal.UF_CRM_DEAL_1773909250766 || '—'}</div>
+                        <div><strong>Дата рождения</strong> — ${formatDate(deal.UF_CRM_DEAL_1773907718196)}</div>
+                        <div><strong>Почта клуба</strong> — ${deal.UF_CRM_DEAL_1773914756198 || '—'}</div>
+                        <div><strong>Почта контактера</strong> — ${deal.UF_CRM_DEAL_1773914958204 || '—'}</div>
+                        <div><strong>Почта РФФ</strong> — ${deal.UF_CRM_DEAL_1774945121159 || '—'}</div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = infoHtml + trackerHtml;
+            container.dataset.loaded = 'true';
+        })
+        .catch(() => { container.innerHTML = '<p class="error-message">Ошибка загрузки сделки</p>'; });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadClubData();
+    });
+</script>
+
+</body>
+</html>

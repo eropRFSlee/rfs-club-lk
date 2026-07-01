@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Верификация документов клубов</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #1a2b4a;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .header h1 { font-size: 22px; font-weight: 600; }
+        .header .user-info { font-size: 14px; opacity: 0.8; }
+        .header .logout-link {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .header .logout-link:hover { background: rgba(255,255,255,0.25); }
+
+        .filters {
+            background: #fff;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .filters label { font-weight: 600; font-size: 14px; color: #1a2a4a; }
+        .filters select {
+            padding: 8px 16px;
+            border: 2px solid #e0e5ec;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 250px;
+            outline: none;
+            background: #f8faff;
+        }
+        .filters select:focus { border-color: #1a2b4a; }
+
+        .club-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid #e0e5ec;
+            margin-top: 16px;
+            display: none;
+        }
+        .club-card.visible { display: block; }
+
+        .club-card .club-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a2a4a;
+            margin-bottom: 4px;
+        }
+        .club-card .club-id {
+            font-size: 14px;
+            color: #6a7b8c;
+            margin-bottom: 16px;
+        }
+
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .doc-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #f8faff;
+            border-bottom: 2px solid #e0e5ec;
+            font-weight: 600;
+            color: #1a2a4a;
+            font-size: 13px;
+        }
+        .doc-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f4f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        .doc-table .doc-name { font-weight: 500; color: #1a2a4a; }
+        .doc-table .doc-file {
+            color: #1a2b4a;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .doc-table .doc-file:hover { color: #2563eb; }
+        .doc-table .doc-file.no-file {
+            color: #6a7b8c;
+            text-decoration: none;
+            cursor: default;
+        }
+        .doc-table .doc-status {
+            text-align: center;
+            font-size: 20px;
+        }
+        .doc-table .doc-status.verified { color: #10b981; }
+        .doc-table .doc-status.not-verified { color: #ef4444; }
+        .doc-table .doc-status.no-file { color: #6a7b8c; }
+
+        .btn-verify {
+            padding: 4px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: #10b981;
+            color: #fff;
+        }
+        .btn-verify:hover { background: #059669; }
+        .btn-verify:disabled {
+            background: #e0e5ec;
+            color: #8ca0b8;
+            cursor: not-allowed;
+        }
+
+        .no-clubs {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6a7b8c;
+        }
+        .no-clubs .icon { font-size: 48px; margin-bottom: 12px; }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast.show { opacity: 1; }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+
+        @media (max-width: 768px) {
+            .doc-table th, .doc-table td { padding: 6px 8px; font-size: 12px; }
+            .doc-table .doc-status { font-size: 16px; }
+            .filters { flex-direction: column; align-items: stretch; }
+            .filters select { min-width: unset; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="header">
+        <h1>Верификация документов клубов</h1>
+        <div>
+            <span class="user-info">{{ user.get_full_name|default:user.username }}</span>
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-link">Выйти</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="filters">
+        <label for="clubFilter">Выберите клуб:</label>
+        <select id="clubFilter" onchange="filterClubs()">
+            <option value="">-- Выберите клуб --</option>
+            {% for club_data in clubs_data %}
+                <option value="{{ club_data.club.id }}">{{ club_data.club.sport_name }} (ID: {{ club_data.club.rfs_id }})</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="clubContainer">
+        {% for club_data in clubs_data %}
+            <div class="club-card" data-club-id="{{ club_data.club.id }}">
+                <div class="club-name">{{ club_data.club.sport_name }}</div>
+                <div class="club-id">РФС ID: {{ club_data.club.rfs_id }}</div>
+                
+                <table class="doc-table">
+                    <thead>
+                        <tr>
+                            <th>Документ</th>
+                            <th>Файл</th>
+                            <th style="text-align:center;">Статус</th>
+                            <th style="text-align:center;">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- УМО -->
+                        <tr>
+                            <td class="doc-name">УМО</td>
+                            <td>
+                                {% if club_data.has_umo and club_data.umo_file_name %}
+                                    <span class="doc-file" onclick="downloadDoc('umo', '{{ club_data.club.id }}')">
+                                        {{ club_data.umo_file_name }}
+                                    </span>
+                                {% elif club_data.has_umo %}
+                                    <span class="doc-file" onclick="downloadDoc('umo', '{{ club_data.club.id }}')">
+                                        Скачать
+                                    </span>
+                                {% else %}
+                                    <span class="doc-file no-file">Нет файла</span>
+                                {% endif %}
+                            </td>
+                            <td class="doc-status {% if club_data.has_umo %}{% if club_data.umo_verified %}verified{% else %}not-verified{% endif %}{% else %}no-file{% endif %}">
+                                {% if club_data.has_umo %}
+                                    {% if club_data.umo_verified %}✔{% else %}✕{% endif %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td style="text-align:center;">
+                                {% if club_data.has_umo %}
+                                    <button class="btn-verify" onclick="verifyDoc('{{ club_data.club.id }}', 'umo')">
+                                        Верифицировать
+                                    </button>
+                                {% else %}
+                                    <button class="btn-verify" disabled>Нет файла</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        
+                        <!-- СТРАХОВКА -->
+                        <tr>
+                            <td class="doc-name">Страховка</td>
+                            <td>
+                                {% if club_data.has_insurance and club_data.insurance_file_name %}
+                                    <span class="doc-file" onclick="downloadDoc('insurance', '{{ club_data.club.id }}')">
+                                        {{ club_data.insurance_file_name }}
+                                    </span>
+                                {% elif club_data.has_insurance %}
+                                    <span class="doc-file" onclick="downloadDoc('insurance', '{{ club_data.club.id }}')">
+                                        Скачать
+                                    </span>
+                                {% else %}
+                                    <span class="doc-file no-file">Нет файла</span>
+                                {% endif %}
+                            </td>
+                            <td class="doc-status {% if club_data.has_insurance %}{% if club_data.insurance_verified %}verified{% else %}not-verified{% endif %}{% else %}no-file{% endif %}">
+                                {% if club_data.has_insurance %}
+                                    {% if club_data.insurance_verified %}✔{% else %}✕{% endif %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td style="text-align:center;">
+                                {% if club_data.has_insurance %}
+                                    <button class="btn-verify" onclick="verifyDoc('{{ club_data.club.id }}', 'insurance')">
+                                        Верифицировать
+                                    </button>
+                                {% else %}
+                                    <button class="btn-verify" disabled>Нет файла</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% empty %}
+            <div class="no-clubs">
+                <div class="icon">📭</div>
+                <p>Нет клубов для отображения</p>
+                <p style="font-size:13px;">Добавьте клубы в админ-панели</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Toast уведомление -->
+<div class="toast" id="toast"></div>
+
+<script>
+    function getSelectedClub() {
+        return localStorage.getItem('selectedClub') || '';
+    }
+
+    function setSelectedClub(clubId) {
+        if (clubId) {
+            localStorage.setItem('selectedClub', clubId);
+        } else {
+            localStorage.removeItem('selectedClub');
+        }
+    }
+
+    function filterClubs() {
+        const filter = document.getElementById('clubFilter').value;
+        const cards = document.querySelectorAll('.club-card');
+        const container = document.getElementById('clubContainer');
+        
+        // Сначала скрываем все карточки
+        cards.forEach(card => {
+            card.classList.remove('visible');
+        });
+        
+        // Если выбран клуб - показываем его
+        if (filter !== '') {
+            cards.forEach(card => {
+                if (card.dataset.clubId === filter) {
+                    card.classList.add('visible');
+                }
+            });
+        }
+        
+        setSelectedClub(filter);
+    }
+
+    // При загрузке страницы - ничего не показываем
+    document.addEventListener('DOMContentLoaded', function() {
+        const select = document.getElementById('clubFilter');
+        const savedClub = getSelectedClub();
+        
+        if (savedClub) {
+            let exists = false;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === savedClub) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) {
+                select.value = savedClub;
+                filterClubs();
+            }
+        }
+        // Если нет сохранённого клуба - select на "-- Выберите клуб --" и ничего не показываем
+    });
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+
+    function downloadDoc(docType, clubId) {
+        window.open('/download-document-admin/' + docType + '/?club_id=' + clubId, '_blank');
+    }
+
+    function verifyDoc(clubId, docType) {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        const currentClub = document.getElementById('clubFilter').value;
+
+        fetch('/admin/verify-action/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                club_id: clubId,
+                doc_type: docType,
+                action: 'verify'
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.textContent = 'Верифицировать';
+            if (data.error) {
+                showToast('Ошибка: ' + data.error, 'error');
+                return;
+            }
+            showToast('Верифицировано', 'success');
+            setSelectedClub(currentClub);
+            location.reload();
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.textContent = 'Верифицировать';
+            showToast('Ошибка: ' + err.message, 'error');
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+</body>
+</html>

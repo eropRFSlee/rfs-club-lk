@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ club.name }}</title>
+</head>
+<body>
+    <h1>{{ club.name }}</h1>
+    
+    <p><strong>Город:</strong> {{ club.city }}</p>
+    <p><strong>Год основания:</strong> {{ club.foundation_year }}</p>
+    
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Выйти</button>
+    </form>
+</body>
+</html>
