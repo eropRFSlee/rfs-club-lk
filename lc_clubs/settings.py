@@ -20,7 +20,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -68,27 +67,21 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# СТАТИКА — ЭТО ГЛАВНОЕ!
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# МЕДИА
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# АУТЕНТИФИКАЦИЯ
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# БИТРИКС24
 BITRIX24_WEBHOOK = "https://drlk.rfs.ru/rest/205/mkoe2cdimf6len15/"
 SMART_PROCESS_ID = 189
 
-# ПОЧТА
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
@@ -101,3 +94,14 @@ SERVER_EMAIL = EMAIL_HOST_USER
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
+# =============================================
+# СОЗДАНИЕ АДМИНА ПРИ ПЕРВОМ ЗАПУСКЕ
+# =============================================
+from django.contrib.auth.models import User
+
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser('admin', 'li_ea@rfs.ru', 'pavino16')
+    print("✅ Админ создан: admin / pavino16")
+else:
+    print("ℹ️ Админ уже существует")
